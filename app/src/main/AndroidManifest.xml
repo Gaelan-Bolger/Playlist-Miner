@@ -5,13 +5,14 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
-        android:name=".PlaylistMiner"
+        android:name="com.unknown.gaelan.PlaylistMiner"
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme">
+
         <activity
-            android:name=".MainActivity"
+            android:name="com.unknown.gaelan.DrawerActivity"
             android:label="@string/app_name"
             android:launchMode="singleInstance">
             <intent-filter>
@@ -19,7 +20,6 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            // An intent filter that will receive the response from the authentication service
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -32,16 +32,19 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".SearchResultsActivity"
-            android:label="@string/title_activity_search_results" />
+            android:name="com.unknown.gaelan.SearchResultsActivity"
+            android:label="@string/app_name" />
         <activity
-            android:name=".PlaylistDetailsActivity"
-            android:label="@string/title_activity_playlist_details" />
+            android:name="com.unknown.gaelan.PlaylistDetailsActivity"
+            android:label="@string/app_name" />
+        <activity
+            android:name="com.unknown.gaelan.SettingsActivity"
+            android:label="@string/app_name" />
 
         <service
-            android:name=".PlaylistsParserService"
+            android:name="com.unknown.gaelan.PlaylistsParserService"
             android:enabled="true"
-            android:exported="true"></service>
+            android:exported="true" />
     </application>
 
 </manifest>

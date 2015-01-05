@@ -5,7 +5,7 @@ android {
     buildToolsVersion "21.1.1"
 
     defaultConfig {
-        applicationId "com.unknown.gaelan.unknown"
+        applicationId "com.unknown.gaelan"
         minSdkVersion 14
         targetSdkVersion 21
         versionCode 1
@@ -37,8 +37,16 @@ dependencies {
     compile 'com.squareup.okhttp:okhttp:2.0.0'
     compile 'com.squareup.okio:okio:1.1.0'
     compile 'com.squareup.retrofit:retrofit:1.8.0'
+    compile 'com.squareup.picasso:picasso:2.4.0'
     compile 'com.spotify.sdk:spotifysdk:1.0.0-beta6@aar'
-    compile files('libs/spotify-web-api-android-0.7.1.201405082137.jar')
     compile 'org.lucasr.twowayview:core:1.0.0-SNAPSHOT@aar'
     compile 'org.lucasr.twowayview:layouts:1.0.0-SNAPSHOT@aar'
+    compile 'com.balysv:material-ripple:0.9.5-SNAPSHOT@aar'
+    compile 'com.appyvet:materialrangebar:0.1'
+    compile 'de.hdodenhof:circleimageview:1.2.1'
+    compile 'com.malinskiy:superrecyclerview:1.0.1'
+    compile 'com.nispok:snackbar:2.7.3'
+    compile project(':preferencefragment')
+    compile project(':spotify-web-api-android')
+    compile project(':discreteSeekBar')
 }

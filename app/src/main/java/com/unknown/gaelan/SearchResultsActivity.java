@@ -13,12 +13,11 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.TextView;
 
 import org.lucasr.twowayview.ItemClickSupport;
@@ -37,9 +36,10 @@ import retrofit.client.Response;
 public class SearchResultsActivity extends ActionBarActivity {
 
     public static final String EXTRA_SEARCH_QUERY = "search_query";
+    public static final String EXTRA_MAX_PLAYLISTS = "max_playlists";
+    public static final String EXTRA_MIN_ALLOWED_TRACK_COUNT = "min_allowed_track_count";
+    public static final String EXTRA_MAX_ALLOWED_TRACK_COUNT = "max_allowed_track_count";
     private static final String TAG = "SearchResultsActivity";
-    private static final int MAX_SEARCH_RESULTS = 100;
-    private static int MAX_ALLOWED_TRACK_COUNT = 100;
 
     private Handler mHandler = new Handler();
     private ProgressDialog mProgress;
@@ -52,34 +52,40 @@ public class SearchResultsActivity extends ActionBarActivity {
             mPlaylistsAdapter.setPlaylists(mPlaylists);
         }
     };
-    private PlaylistsAdapter mPlaylistsAdapter;
+    private PlaylistSimpleAdapter mPlaylistsAdapter;
     private TextView btnFindTopTracks;
     private TwoWayView mRecyclerView;
+    private PlaylistsParserService mService;
+    private ServiceConnection mServiceConnection;
+    private boolean mBound;
+    private int mMinAllowedTrackCount;
+    private int mMaxAllowedTrackCount;
+    private int mMaxPlaylists;
     private Runnable mHideProgressRunnable = new Runnable() {
         @Override
         public void run() {
             hideProgressDialog();
         }
     };
-    private PlaylistsParserService mService;
-    private ServiceConnection mServiceConnection;
-    private boolean mBound;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mSearchQuery = getIntent().getExtras().getString(EXTRA_SEARCH_QUERY);
-        if (TextUtils.isEmpty(mSearchQuery)) {
+        mMaxPlaylists = getIntent().getExtras().getInt(EXTRA_MAX_PLAYLISTS, -1);
+        mMinAllowedTrackCount = getIntent().getExtras().getInt(EXTRA_MIN_ALLOWED_TRACK_COUNT);
+        mMaxAllowedTrackCount = getIntent().getExtras().getInt(EXTRA_MAX_ALLOWED_TRACK_COUNT);
+        if (TextUtils.isEmpty(mSearchQuery) || mMaxPlaylists == -1) {
             finish();
             return;
         }
 
         PrefsHelper.putRecent(this, mSearchQuery);
-        MAX_ALLOWED_TRACK_COUNT = PrefsHelper.getMaxAllowedTrackCount(this);
 
+        setContentView(R.layout.activity_search_results);
+        setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
         getSupportActionBar().setTitle("'" + mSearchQuery + "'");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        setContentView(R.layout.activity_search_results);
 
         showProgressDialog("Searching playlists");
         performPlaylistSearch(mSearchQuery);
@@ -113,7 +119,7 @@ public class SearchResultsActivity extends ActionBarActivity {
         });
         final Drawable divider = getResources().getDrawable(R.drawable.divider_thin_opaque);
         mRecyclerView.addItemDecoration(new DividerItemDecoration(divider));
-        mPlaylistsAdapter = new PlaylistsAdapter(this);
+        mPlaylistsAdapter = new PlaylistSimpleAdapter(this);
         mRecyclerView.setAdapter(mPlaylistsAdapter);
     }
 
@@ -170,15 +176,19 @@ public class SearchResultsActivity extends ActionBarActivity {
                 if (null == mPlaylists) {
                     mPlaylists = new ArrayList<>(playlistsPager.playlists.total);
                 }
-                List<PlaylistSimple> items = playlistsPager.playlists.items;
-                for (int i = 0; i < items.size(); i++) {
-                    PlaylistSimple playlist = items.get(i);
-                    if (playlist.tracks.total <= MAX_ALLOWED_TRACK_COUNT) {
+                List<PlaylistSimple> playlists = playlistsPager.playlists.items;
+                for (int i = 0; i < playlists.size(); i++) {
+                    PlaylistSimple playlist = playlists.get(i);
+                    int total = playlist.tracks.total;
+                    if (total >= mMinAllowedTrackCount && total <= mMaxAllowedTrackCount)
                         mPlaylists.add(playlist);
+                    if (mPlaylists.size() >= mMaxPlaylists) {
+                        mHandler.post(mDisplayPlaylistsRunnable);
+                        return;
                     }
                 }
-                int newOffset = offset + items.size();
-                if (newOffset >= MAX_SEARCH_RESULTS || newOffset >= playlistsPager.playlists.total) {
+                int newOffset = offset + playlists.size();
+                if (newOffset >= playlistsPager.playlists.total) {
                     mHandler.post(mDisplayPlaylistsRunnable);
                 } else {
                     performPlaylistSearch(searchString, newOffset);
@@ -216,8 +226,17 @@ public class SearchResultsActivity extends ActionBarActivity {
                     public void onPlaylistsParsed(ArrayList<RankedTrack> rankedTracks) {
                         unbindService();
                         Log.d(TAG, "Tracks ranked = " + rankedTracks.size());
-                        showAlert("Tracks ranked = " + rankedTracks.size());
+                        showAlert("Tracks ranked: " + rankedTracks.size() + "\nAverage rank: " + getAverageRank(rankedTracks));
                         showRankedTracksFragment(rankedTracks);
+                    }
+
+                    private float getAverageRank(ArrayList<RankedTrack> rankedTracks) {
+                        float total = 0f;
+                        int trackCount = rankedTracks.size();
+                        for (int i = 0; i < trackCount; i++) {
+                            total += rankedTracks.get(i).rank;
+                        }
+                        return total / trackCount;
                     }
 
                     @Override
@@ -245,51 +264,6 @@ public class SearchResultsActivity extends ActionBarActivity {
     private void showRankedTracksFragment(ArrayList<RankedTrack> rankedTracks) {
         RankedTracksFragment fragment = RankedTracksFragment.newInstance(rankedTracks);
         getSupportFragmentManager().beginTransaction().replace(R.id.container, fragment, "ranked_tracks").commit();
-    }
-
-    class PlaylistsAdapter extends RecyclerView.Adapter<PlaylistsAdapter.ViewHolder> {
-
-        private final Context sContext;
-        private List<PlaylistSimple> sPlaylists;
-
-        public PlaylistsAdapter(Context context) {
-            this.sContext = context;
-        }
-
-        public void setPlaylists(List<PlaylistSimple> playlists) {
-            this.sPlaylists = playlists;
-            notifyDataSetChanged();
-        }
-
-        @Override
-        public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View view = LayoutInflater.from(sContext).inflate(android.R.layout.simple_list_item_2, parent, false);
-            return new ViewHolder(view);
-        }
-
-        @Override
-        public void onBindViewHolder(ViewHolder holder, int position) {
-            PlaylistSimple playlist = mPlaylists.get(position);
-            holder.name.setText(playlist.name);
-            holder.trackCount.setText(playlist.tracks.total + " tracks");
-        }
-
-        @Override
-        public int getItemCount() {
-            return null == sPlaylists ? 0 : sPlaylists.size();
-        }
-
-        public class ViewHolder extends RecyclerView.ViewHolder {
-
-            public TextView name;
-            public TextView trackCount;
-
-            public ViewHolder(View itemView) {
-                super(itemView);
-                name = (TextView) itemView.findViewById(android.R.id.text1);
-                trackCount = (TextView) itemView.findViewById(android.R.id.text2);
-            }
-        }
     }
 
 }

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:title="@string/app_name">
+
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="network_traffic_autohide"
+        android:summary="summary"
+        android:title="title" />
+
+</PreferenceScreen>

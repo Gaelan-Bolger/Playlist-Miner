@@ -1,0 +1,172 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".DrawerActivity">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clipToPadding="false"
+            android:divider="@drawable/divider_fat_transparent"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:showDividers="middle">
+
+            <EditText
+                android:id="@+id/et_search"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:hint="e.g. 'OneDirection', 'Indie', 'Dinner Party',..."
+                android:inputType="text|textAutoComplete|textAutoCorrect"
+                android:maxLines="1"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+
+            <android.support.v7.widget.CardView
+                style="@style/Card.Light"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        style="@style/Text.Card.Title"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_weight="1"
+                        android:text="Playlists" />
+
+                    <ImageView
+                        android:id="@+id/iv_learn_playlists"
+                        style="@style/Icon.LearnMore.Clickable"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_weight="0" />
+                </LinearLayout>
+
+                <com.appyvet.rangebar.RangeBar
+                    android:id="@+id/rb_max_playlists"
+                    android:layout_width="match_parent"
+                    android:layout_height="72dp"
+                    android:layout_marginTop="24dp"
+                    app:pinColor="?attr/colorAccent"
+                    app:rangeBar="false"
+                    app:selectorColor="?attr/colorAccent"
+                    app:tickColor="?attr/colorAccent"
+                    app:tickEnd="100"
+                    app:tickInterval="1"
+                    app:tickStart="1" />
+
+                <LinearLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="80dp"
+                    android:orientation="horizontal"
+                    android:padding="4dp">
+
+                    <TextView
+                        android:id="@+id/tv_max_playlists"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="center_horizontal"
+                        android:inputType="number"
+                        android:textAppearance="?android:textAppearanceMedium"
+                        android:textColor="?attr/colorPrimary"
+                        tools:text="500" />
+                </LinearLayout>
+            </android.support.v7.widget.CardView>
+
+            <android.support.v7.widget.CardView
+                style="@style/Card.Light"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        style="@style/Text.Card.Title"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_weight="1"
+                        android:text="Playlist Tracks" />
+
+                    <ImageView
+                        android:id="@+id/iv_learn_playlist_tracks"
+                        style="@style/Icon.LearnMore.Clickable"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_weight="0" />
+                </LinearLayout>
+
+                <com.appyvet.rangebar.RangeBar
+                    android:id="@+id/rb_playlist_tracks"
+                    android:layout_width="match_parent"
+                    android:layout_height="72dp"
+                    android:layout_marginTop="24dp"
+                    app:pinColor="?attr/colorAccent"
+                    app:selectorColor="?attr/colorAccent"
+                    app:tickColor="?attr/colorAccent"
+                    app:tickEnd="500"
+                    app:tickInterval="5"
+                    app:tickStart="0" />
+
+                <LinearLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="80dp"
+                    android:orientation="horizontal"
+                    android:padding="4dp">
+
+                    <TextView
+                        android:id="@+id/tv_min_track_count"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="center_horizontal"
+                        android:textAppearance="?android:textAppearanceMedium"
+                        android:textColor="?attr/colorPrimary"
+                        tools:text="0" />
+
+                    <TextView
+                        android:id="@+id/tv_max_track_count"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="center_horizontal"
+                        android:inputType="number"
+                        android:textAppearance="?android:textAppearanceMedium"
+                        android:textColor="?attr/colorPrimary"
+                        tools:text="500" />
+                </LinearLayout>
+            </android.support.v7.widget.CardView>
+        </LinearLayout>
+    </ScrollView>
+
+    <Button
+        android:id="@+id/btn_search"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_weight="0"
+        android:background="@color/accentColor"
+        android:text="Mine Playlists"
+        android:textColor="@android:color/white" />
+</LinearLayout>

@@ -1,6 +1,15 @@
 <resources>
 
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="AppTheme" parent="@style/Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowBackground">@color/windowBackground</item>
+        <item name="colorPrimary">@color/primaryColor</item>
+        <item name="colorPrimaryDark">@color/primaryColorDark</item>
+        <item name="colorAccent">@color/accentColor</item>
+        <item name="drawerArrowStyle">@style/MyDrawerArrowToggle</item>
+    </style>
+
+    <style name="MyDrawerArrowToggle" parent="Widget.AppCompat.DrawerArrowToggle">
+        <item name="color">@android:color/white</item>
     </style>
 
     <style name="TwoWayViewBase">
@@ -15,6 +24,49 @@
         <item name="android:gravity">center</item>
         <item name="android:textColor">#ffffff</item>
         <item name="android:background">#33000000</item>
+    </style>
+
+    <style name="Card">
+        <item name="cardCornerRadius">4dp</item>
+        <item name="cardElevation">2dp</item>
+        <item name="contentPadding">8dp</item>
+    </style>
+
+    <style name="Card.Light">
+        <item name="cardBackgroundColor">@android:color/white</item>
+    </style>
+
+    <style name="Card.Dark">
+        <item name="cardBackgroundColor">@android:color/black</item>
+    </style>
+
+    <style name="Text">
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+
+    <style name="Text.Card">
+        <item name="android:textColor">?attr/colorPrimary</item>
+    </style>
+
+    <style name="Text.Card.Title">
+        <item name="android:textAppearance">?android:textAppearanceMedium</item>
+        <item name="android:paddingLeft">4dp</item>
+    </style>
+
+    <style name="Text.Card.Title.Clickable">
+        <item name="android:textColor">@color/clickable_text_color</item>
+    </style>
+
+    <style name="Icon">
+        <item name="android:scaleType">centerInside</item>
+    </style>
+
+    <style name="Icon.LearnMore">
+        <item name="android:src">@drawable/ic_learn_more_primary</item>
+    </style>
+
+    <style name="Icon.LearnMore.Clickable">
+        <item name="android:src">@drawable/ic_learn_more_selector</item>
     </style>
 
 </resources>
