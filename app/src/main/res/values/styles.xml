@@ -26,17 +26,18 @@
         <item name="android:background">#33000000</item>
     </style>
 
-    <style name="Card">
+    <style name="CardView">
         <item name="cardCornerRadius">4dp</item>
         <item name="cardElevation">2dp</item>
         <item name="contentPadding">8dp</item>
+        <item name="android:foreground">?android:attr/selectableItemBackground</item>
     </style>
 
-    <style name="Card.Light">
+    <style name="CardView.Light">
         <item name="cardBackgroundColor">@android:color/white</item>
     </style>
 
-    <style name="Card.Dark">
+    <style name="CardView.Dark">
         <item name="cardBackgroundColor">@android:color/black</item>
     </style>
 

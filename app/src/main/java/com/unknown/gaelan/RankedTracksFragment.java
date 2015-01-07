@@ -42,13 +42,18 @@ import retrofit.client.Response;
 public class RankedTracksFragment extends Fragment {
 
     private static final String TAG = "RankedTracksFragment";
+    private static final String ARG_SEARCH_QUERY = "ARG_SEARCH_QUERY";
 
     private ArrayList<RankedTrack> mRankedTracks;
     private RankedTrackAdapter mRankedTrackAdapter;
     private TwoWayView mRecyclerView;
+    private String mSearchQuery;
 
-    public static RankedTracksFragment newInstance(ArrayList<RankedTrack> rankedTracks) {
+    public static RankedTracksFragment newInstance(String searchQuery, ArrayList<RankedTrack> rankedTracks) {
         RankedTracksFragment fragment = new RankedTracksFragment();
+        Bundle bundle = new Bundle();
+        bundle.putString(ARG_SEARCH_QUERY, searchQuery);
+        fragment.setArguments(bundle);
         fragment.setRankedTracks(rankedTracks);
         return fragment;
     }
@@ -57,6 +62,7 @@ public class RankedTracksFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+        mSearchQuery = getArguments().getString(ARG_SEARCH_QUERY);
         mRankedTrackAdapter = new RankedTrackAdapter(getActivity());
     }
 
@@ -112,7 +118,7 @@ public class RankedTracksFragment extends Fragment {
     }
 
     private void onSaveAsPlaylist() {
-        SaveRankedTracksOptionsDialogFragment.newInstance(getHighestRank(), new SaveRankedTracksOptionsDialogFragment.SaveRankedTracksOptionsListener() {
+        SaveRankedTracksOptionsDialogFragment.newInstance(mSearchQuery, getHighestRank(), new SaveRankedTracksOptionsDialogFragment.SaveRankedTracksOptionsListener() {
             @Override
             public void onConfirmed(String playlistName, int minimumRank) {
                 saveAsPlaylist(playlistName, minimumRank);

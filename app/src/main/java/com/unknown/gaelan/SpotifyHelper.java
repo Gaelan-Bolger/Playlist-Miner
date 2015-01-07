@@ -32,7 +32,7 @@ public class SpotifyHelper {
             StringEntity stringEntity = new StringEntity(requestData.toString());
             httpPost.setEntity(stringEntity);
             httpPost.setHeader("Content-type", "application/json");
-            httpPost.setHeader("Authorization", "Bearer " + PrefsHelper.getToken(context));
+            httpPost.setHeader("Authorization", "Bearer " + PrefsHelper.getAccessToken(context));
             httpClient.execute(httpPost, responseHandler);
         } catch (Exception e) {
             e.printStackTrace();

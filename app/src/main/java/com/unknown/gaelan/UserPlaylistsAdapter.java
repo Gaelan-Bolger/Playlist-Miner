@@ -1,6 +1,7 @@
 package com.unknown.gaelan;
 
 import android.content.Context;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,17 +19,19 @@ import kaaes.spotify.webapi.android.models.Playlist;
 /**
  * Created by Gaelan on 1/4/2015.
  */
-public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.ViewHolder> {
+public class UserPlaylistsAdapter extends RecyclerView.Adapter<UserPlaylistsAdapter.ViewHolder> {
 
-    private final Context sContext;
+    private Context sContext;
+    private ItemClickSupport sItemClickSupport;
     private List<Playlist> sPlaylists;
 
-    public PlaylistAdapter(Context context) {
-        this(context, null);
+    public UserPlaylistsAdapter(Context context, ItemClickSupport itemClickSupport) {
+        this(context, itemClickSupport, null);
     }
 
-    public PlaylistAdapter(Context context, List<Playlist> playlists) {
+    public UserPlaylistsAdapter(Context context, ItemClickSupport itemClickSupport, List<Playlist> playlists) {
         this.sContext = context;
+        this.sItemClickSupport = itemClickSupport;
         this.sPlaylists = playlists;
     }
 
@@ -39,20 +42,35 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.ViewHo
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(sContext).inflate(R.layout.playlist_list_item, parent, false);
+        View view = LayoutInflater.from(sContext).inflate(R.layout.user_playlist_list_item, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
+    public void onBindViewHolder(ViewHolder holder, final int position) {
         Playlist playlist = sPlaylists.get(position);
+        holder.name.setText(playlist.name);
+        int total = playlist.tracks.total;
+        holder.trackCount.setText(sContext.getResources().getQuantityString(R.plurals.track, total, total));
         List<Image> images = playlist.images;
         if (null != images && images.size() > 0)
-            Picasso.with(sContext).load(images.get(0).url).resize(192, 192).into(holder.image);
+            Picasso.with(sContext).load(images.get(0).url).placeholder(R.drawable.ic_playlist_primary).error(R.drawable.ic_playlist_primary).resize(192, 192).into(holder.image);
         else
-            holder.image.setImageResource(R.drawable.ic_launcher);
-        holder.name.setText(playlist.name);
-        holder.trackCount.setText(playlist.tracks.total + " tracks");
+            holder.image.setImageResource(R.drawable.ic_playlist_primary);
+        if (null != sItemClickSupport) {
+            holder.itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    sItemClickSupport.onItemClicked(position);
+                }
+            });
+            holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    return sItemClickSupport.onItemLongClicked(position);
+                }
+            });
+        }
     }
 
     @Override
@@ -68,7 +86,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.ViewHo
 
     public void insertViaUndo(int position, Playlist playlist) {
         sPlaylists.add(position, playlist);
-        notifyDataSetChanged();
+        notifyItemInserted(position);
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {

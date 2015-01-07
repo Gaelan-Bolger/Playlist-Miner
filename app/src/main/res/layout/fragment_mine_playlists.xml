@@ -1,15 +1,33 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
+    android:focusable="true"
+    android:focusableInTouchMode="true"
     tools:context=".DrawerActivity">
+
+    <FrameLayout
+        android:id="@+id/btn_search"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:foreground="?android:attr/selectableItemBackground">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/accentColor"
+            android:gravity="center"
+            android:text="Mine Playlists"
+            android:textAppearance="?android:attr/textAppearanceButton"
+            android:textColor="@android:color/primary_text_dark" />
+
+    </FrameLayout>
 
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_weight="1">
+        android:layout_below="@id/btn_search">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -20,18 +38,54 @@
             android:padding="16dp"
             android:showDividers="middle">
 
-            <EditText
-                android:id="@+id/et_search"
+            <android.support.v7.widget.CardView
+                style="@style/CardView.Light"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_horizontal"
-                android:hint="e.g. 'OneDirection', 'Indie', 'Dinner Party',..."
-                android:inputType="text|textAutoComplete|textAutoCorrect"
-                android:maxLines="1"
-                android:textAppearance="?android:attr/textAppearanceMedium" />
+                android:layout_height="wrap_content">
+
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            style="@style/Text.Card.Title"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:layout_weight="1"
+                            android:text="Keywords" />
+
+                        <ImageView
+                            android:id="@+id/iv_learn_keywords"
+                            style="@style/Icon.LearnMore.Clickable"
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_weight="0" />
+                    </LinearLayout>
+
+                    <EditText
+                        android:id="@+id/et_search"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:gravity="center_horizontal"
+                        android:hint="e.g. 'OneDirection', 'Indie', 'Dinner Party',..."
+                        android:inputType="text|textAutoComplete|textAutoCorrect"
+                        android:maxLines="1"
+                        android:textAppearance="?android:attr/textAppearanceMedium" />
+                </LinearLayout>
+            </android.support.v7.widget.CardView>
 
             <android.support.v7.widget.CardView
-                style="@style/Card.Light"
+                style="@style/CardView.Light"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
@@ -91,7 +145,7 @@
             </android.support.v7.widget.CardView>
 
             <android.support.v7.widget.CardView
-                style="@style/Card.Light"
+                style="@style/CardView.Light"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
@@ -160,13 +214,4 @@
             </android.support.v7.widget.CardView>
         </LinearLayout>
     </ScrollView>
-
-    <Button
-        android:id="@+id/btn_search"
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:layout_weight="0"
-        android:background="@color/accentColor"
-        android:text="Mine Playlists"
-        android:textColor="@android:color/white" />
-</LinearLayout>
+</RelativeLayout>

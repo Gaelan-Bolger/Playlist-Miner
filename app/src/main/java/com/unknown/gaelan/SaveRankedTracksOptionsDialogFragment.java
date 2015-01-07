@@ -18,14 +18,17 @@ import android.widget.TextView;
 public class SaveRankedTracksOptionsDialogFragment extends DialogFragment {
 
     private static final java.lang.String ARG_HIGHEST_RANK = "highest_rank";
+    private static final java.lang.String ARG_SEARCH_QUERY = "search_query";
 
     private SaveRankedTracksOptionsListener mListener;
     private int mHighestRank;
+    private String mSearchQuery;
 
-    public static SaveRankedTracksOptionsDialogFragment newInstance(int highestRank, SaveRankedTracksOptionsListener listener) {
+    public static SaveRankedTracksOptionsDialogFragment newInstance(String searchQuery, int highestRank, SaveRankedTracksOptionsListener listener) {
         SaveRankedTracksOptionsDialogFragment fragment = new SaveRankedTracksOptionsDialogFragment();
         Bundle bundle = new Bundle();
         bundle.putInt(ARG_HIGHEST_RANK, highestRank);
+        bundle.putString(ARG_SEARCH_QUERY, searchQuery);
         fragment.setArguments(bundle);
         fragment.setListener(listener);
         return fragment;
@@ -39,6 +42,7 @@ public class SaveRankedTracksOptionsDialogFragment extends DialogFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mHighestRank = getArguments().getInt(ARG_HIGHEST_RANK, 0);
+        mSearchQuery = getArguments().getString(ARG_SEARCH_QUERY);
     }
 
     @NonNull
@@ -47,6 +51,7 @@ public class SaveRankedTracksOptionsDialogFragment extends DialogFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         View view = LayoutInflater.from(getActivity()).inflate(R.layout.dialog_save_ranked_tracks_options, null);
         final EditText etPlaylistName = (EditText) view.findViewById(R.id.et_playlist_name);
+        etPlaylistName.setHint(mSearchQuery);
         final TextView tvMinimumRankValue = (TextView) view.findViewById(R.id.tv_minimum_rank_value);
         tvMinimumRankValue.setText(String.valueOf(1));
         final SeekBar sbMinimumRank = (SeekBar) view.findViewById(R.id.sb_minimum_rank);

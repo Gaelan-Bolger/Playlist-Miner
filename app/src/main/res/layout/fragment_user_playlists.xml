@@ -5,10 +5,10 @@
     android:layout_height="match_parent">
 
     <com.malinskiy.superrecyclerview.SuperRecyclerView
-        android:id="@+id/two_way_view"
-        style="@style/TwoWayView"
+        android:id="@+id/recycler_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        app:layout_empty="@layout/empty_generic"
         app:recyclerClipToPadding="false"
         app:scrollbarStyle="outsideOverlay" />
 </LinearLayout>

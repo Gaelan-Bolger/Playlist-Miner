@@ -5,7 +5,6 @@
       <module fileurl="file://$PROJECT_DIR$/Playlist Miner.iml" filepath="$PROJECT_DIR$/Playlist Miner.iml" />
       <module fileurl="file://$PROJECT_DIR$/Unknown.iml" filepath="$PROJECT_DIR$/Unknown.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/discreteSeekBar/discreteSeekBar.iml" filepath="$PROJECT_DIR$/discreteSeekBar/discreteSeekBar.iml" />
       <module fileurl="file://$PROJECT_DIR$/preferencefragment/preferencefragment.iml" filepath="$PROJECT_DIR$/preferencefragment/preferencefragment.iml" />
       <module fileurl="file://$PROJECT_DIR$/spotify-web-api-android/spotify-web-api-android.iml" filepath="$PROJECT_DIR$/spotify-web-api-android/spotify-web-api-android.iml" />
     </modules>

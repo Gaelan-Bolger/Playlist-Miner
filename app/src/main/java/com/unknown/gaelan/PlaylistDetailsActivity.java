@@ -3,7 +3,7 @@ package com.unknown.gaelan;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.graphics.drawable.Drawable;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.RecyclerView;
@@ -26,13 +26,15 @@ import org.apache.http.client.HttpResponseException;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.util.EntityUtils;
 import org.lucasr.twowayview.ItemClickSupport;
-import org.lucasr.twowayview.widget.DividerItemDecoration;
 import org.lucasr.twowayview.widget.TwoWayView;
 
 import java.io.IOException;
 import java.util.List;
 
 import kaaes.spotify.webapi.android.models.Pager;
+import kaaes.spotify.webapi.android.models.Playlist;
+import kaaes.spotify.webapi.android.models.PlaylistBase;
+import kaaes.spotify.webapi.android.models.PlaylistSimple;
 import kaaes.spotify.webapi.android.models.PlaylistTrack;
 import kaaes.spotify.webapi.android.models.SnapshotId;
 import kaaes.spotify.webapi.android.models.User;
@@ -49,28 +51,38 @@ public class PlaylistDetailsActivity extends ActionBarActivity {
     public static final String EXTRA_PLAYLIST_ID = "playlist_id";
     public static final String EXTRA_PLAYLIST_NAME = "playlist_name";
     private static final String TAG = "PlaylistDetailsActivity";
+    private String mPlaylistOwnerId;
+    private String mPlaylistId;
     private String mPlaylistName;
     private List<PlaylistTrack> mTracks;
     private TextView mEmptyText;
     private ProgressBar mProgress;
     private TwoWayView mRecyclerView;
-    private PlaylistAdapter mPlaylistAdapter;
+    private PlaylistDetailsAdapter mPlaylistAdapter;
+
+    public static void start(Context context, PlaylistBase playlist) {
+        Intent intent = new Intent(context, PlaylistDetailsActivity.class);
+        intent.putExtra(PlaylistDetailsActivity.EXTRA_PLAYLIST_OWNER_ID, playlist.owner.id);
+        intent.putExtra(PlaylistDetailsActivity.EXTRA_PLAYLIST_ID, playlist.id);
+        intent.putExtra(PlaylistDetailsActivity.EXTRA_PLAYLIST_NAME, playlist.name);
+        context.startActivity(intent);
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Bundle extras = getIntent().getExtras();
-        String playlistOwnerId = extras.getString(EXTRA_PLAYLIST_OWNER_ID);
-        String playlistId = extras.getString(EXTRA_PLAYLIST_ID);
+        mPlaylistOwnerId = extras.getString(EXTRA_PLAYLIST_OWNER_ID);
+        mPlaylistId = extras.getString(EXTRA_PLAYLIST_ID);
         mPlaylistName = extras.getString(EXTRA_PLAYLIST_NAME);
 
-        mPlaylistAdapter = new PlaylistAdapter(this);
+        mPlaylistAdapter = new PlaylistDetailsAdapter(this);
         setContentView(R.layout.activity_playlist_details);
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle(mPlaylistName);
 
-        performPlaylistTracksSearch(playlistOwnerId, playlistId);
+        performPlaylistTracksSearch();
     }
 
     @Override
@@ -86,8 +98,7 @@ public class PlaylistDetailsActivity extends ActionBarActivity {
                 PlaylistMiner.getPlayer(PlaylistDetailsActivity.this).play(mTracks.get(i).track.uri);
             }
         });
-        final Drawable divider = getResources().getDrawable(R.drawable.divider_thin_opaque);
-        mRecyclerView.addItemDecoration(new DividerItemDecoration(divider));
+        mRecyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL_LIST));
         mRecyclerView.setAdapter(mPlaylistAdapter);
     }
 
@@ -104,6 +115,12 @@ public class PlaylistDetailsActivity extends ActionBarActivity {
     }
 
     @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        menu.findItem(R.id.action_save).setVisible(!PlaylistMiner.getUser().id.equals(mPlaylistOwnerId));
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
@@ -117,8 +134,8 @@ public class PlaylistDetailsActivity extends ActionBarActivity {
         }
     }
 
-    private void performPlaylistTracksSearch(String playlistOwnerId, String playlistId) {
-        PlaylistMiner.getSpotifyService(this).getPlaylistTracks(playlistOwnerId, playlistId, new Callback<Pager<PlaylistTrack>>() {
+    private void performPlaylistTracksSearch() {
+        PlaylistMiner.getSpotifyService(this).getPlaylistTracks(mPlaylistOwnerId, mPlaylistId, new Callback<Pager<PlaylistTrack>>() {
             @Override
             public void success(Pager<PlaylistTrack> playlistTrackPager, Response response) {
                 mTracks = playlistTrackPager.items;
@@ -206,12 +223,12 @@ public class PlaylistDetailsActivity extends ActionBarActivity {
         });
     }
 
-    class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.ViewHolder> {
+    class PlaylistDetailsAdapter extends RecyclerView.Adapter<PlaylistDetailsAdapter.ViewHolder> {
 
         private Context sContext;
         private List<PlaylistTrack> sTracks;
 
-        public PlaylistAdapter(Context context) {
+        public PlaylistDetailsAdapter(Context context) {
             sContext = context;
         }
 

@@ -1,9 +1,7 @@
 package com.unknown.gaelan;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.content.res.Configuration;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -22,8 +20,6 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.spotify.sdk.android.authentication.AuthenticationResponse;
-import com.spotify.sdk.android.authentication.SpotifyAuthentication;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -31,17 +27,12 @@ import java.util.List;
 import de.hdodenhof.circleimageview.CircleImageView;
 import kaaes.spotify.webapi.android.models.Image;
 import kaaes.spotify.webapi.android.models.User;
-import retrofit.Callback;
-import retrofit.RetrofitError;
-import retrofit.client.Response;
 
 public class DrawerActivity extends ActionBarActivity {
 
     private static final String TAG = "DrawerActivity";
-    private static final String[] SCOPES = new String[]{"user-read-private", "user-read-email", "playlist-read-private", "playlist-modify-public", "playlist-modify-private", "streaming"};
-    private static final String CURRENT_FRAGMENT = "current";
+    private static final String[] NAV_SECTIONS = {"Search Playlists", "Recent Searches", "My Playlists", "More Options"};
     private FragmentManager mFm;
-    private User mUser;
     private Toolbar mToolbar;
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
@@ -50,6 +41,7 @@ public class DrawerActivity extends ActionBarActivity {
     private CircleImageView ivUserImage;
     private TextView tvUserDisplayName;
     private TextView tvUserEmail;
+    private int mSelectedPosition = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,7 +50,6 @@ public class DrawerActivity extends ActionBarActivity {
         setContentView(R.layout.activity_drawer);
         setSupportActionBar(mToolbar);
         selectFragment(0);
-        SpotifyAuthentication.openAuthWindow(PlaylistMiner.CLIENT_ID, "token", PlaylistMiner.REDIRECT_URI, SCOPES, null, this);
     }
 
     @Override
@@ -73,6 +64,7 @@ public class DrawerActivity extends ActionBarActivity {
             @Override
             public void onDrawerClosed(View drawerView) {
                 super.onDrawerClosed(drawerView);
+                getSupportActionBar().setTitle(NAV_SECTIONS[mSelectedPosition]);
             }
 
             @Override
@@ -82,7 +74,7 @@ public class DrawerActivity extends ActionBarActivity {
             }
         };
         mDrawerLayout.setDrawerListener(mDrawerToggle);
-        mDrawerAdapter = new ArrayAdapter<String>(this, R.layout.nav_section_item, new String[]{"Search", "Recent", "Playlists", "More"});
+        mDrawerAdapter = new ArrayAdapter<String>(this, R.layout.nav_section_item, NAV_SECTIONS);
         mDrawerList = (ListView) findViewById(R.id.left_drawer);
         mDrawerList.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         mDrawerList.setAdapter(mDrawerAdapter);
@@ -99,18 +91,7 @@ public class DrawerActivity extends ActionBarActivity {
         ivUserImage = (CircleImageView) findViewById(R.id.user_image);
         tvUserDisplayName = (TextView) findViewById(R.id.user_display_name);
         tvUserEmail = (TextView) findViewById(R.id.user_email);
-    }
-
-    @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-        Uri uri = intent.getData();
-        if (uri != null) {
-            AuthenticationResponse response = SpotifyAuthentication.parseOauthResponse(uri);
-            String accessToken = response.getAccessToken();
-            PrefsHelper.putToken(this, accessToken);
-            getUser();
-        }
+        updateDrawerHeader();
     }
 
     @Override
@@ -159,31 +140,11 @@ public class DrawerActivity extends ActionBarActivity {
         super.onBackPressed();
     }
 
-    private void getUser() {
-        PlaylistMiner.getSpotifyService(this).getMe(new Callback<User>() {
-            @Override
-            public void success(final User user, Response response) {
-                mUser = user;
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        updateDrawerHeader();
-                    }
-                });
-
-            }
-
-            @Override
-            public void failure(RetrofitError error) {
-
-            }
-        });
-    }
-
     private void updateDrawerHeader() {
-        tvUserDisplayName.setText(mUser.display_name);
-        tvUserEmail.setText(mUser.email);
-        List<Image> images = mUser.images;
+        User user = PlaylistMiner.getUser();
+        tvUserDisplayName.setText(user.display_name);
+        tvUserEmail.setText(user.email);
+        List<Image> images = user.images;
         if (null != images && images.size() > 0) {
             Image image = images.get(0);
             Picasso.with(this).load(image.url).into(ivUserImage);
@@ -191,31 +152,27 @@ public class DrawerActivity extends ActionBarActivity {
     }
 
     private boolean selectFragment(int position) {
-        Fragment fragment;
-        switch (position) {
-            case 0:
-                fragment = MainFragment.newInstance();
-                break;
-            case 2:
-                fragment = UserPlaylistsFragment.newInstance(mUser);
-                break;
-            default:
-                fragment = PlaceholderFragment.newInstance(position);
-                break;
+        if (mSelectedPosition != position) {
+            mSelectedPosition = position;
+            Fragment fragment;
+            switch (position) {
+                case 0:
+                    fragment = MinePlaylistsFragment.newInstance();
+                    break;
+                case 2:
+                    fragment = UserPlaylistsFragment.newInstance();
+                    break;
+                default:
+                    fragment = PlaceholderFragment.newInstance(position);
+                    break;
 
-        }
-        Fragment currentFragment = getCurrentFragment();
-        if (null == currentFragment || !fragment.equals(currentFragment)) {
+            }
             mFm.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
-            mFm.beginTransaction().replace(R.id.container, fragment, CURRENT_FRAGMENT).commit();
+            mFm.beginTransaction().replace(R.id.container, fragment, "visible").commit();
             mDrawerList.setItemChecked(position, true);
             return true;
         }
         return false;
-    }
-
-    private Fragment getCurrentFragment() {
-        return mFm.findFragmentByTag(CURRENT_FRAGMENT);
     }
 
     public static class PlaceholderFragment extends Fragment {

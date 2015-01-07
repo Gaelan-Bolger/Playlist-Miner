@@ -7,11 +7,11 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
@@ -20,9 +20,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
-import org.lucasr.twowayview.ItemClickSupport;
-import org.lucasr.twowayview.widget.DividerItemDecoration;
-import org.lucasr.twowayview.widget.TwoWayView;
+import com.malinskiy.superrecyclerview.SuperRecyclerView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,16 +43,27 @@ public class SearchResultsActivity extends ActionBarActivity {
     private ProgressDialog mProgress;
     private String mSearchQuery;
     private ArrayList<PlaylistSimple> mPlaylists;
+    private PlaylistSimpleAdapter mPlaylistSimpleAdapter;
     private Runnable mDisplayPlaylistsRunnable = new Runnable() {
         @Override
         public void run() {
             hideProgressDialog();
-            mPlaylistsAdapter.setPlaylists(mPlaylists);
+            mPlaylistSimpleAdapter = new PlaylistSimpleAdapter(SearchResultsActivity.this, new ItemClickSupport() {
+                @Override
+                public void onItemClicked(int position) {
+                    PlaylistSimple playlist = mPlaylists.get(position);
+                    PlaylistDetailsActivity.start(SearchResultsActivity.this, playlist);
+                }
+
+                @Override
+                public boolean onItemLongClicked(int position) {
+                    return false;
+                }
+            }, mPlaylists);
+            mRecyclerView.setAdapter(mPlaylistSimpleAdapter);
         }
     };
-    private PlaylistSimpleAdapter mPlaylistsAdapter;
-    private TextView btnFindTopTracks;
-    private TwoWayView mRecyclerView;
+    private SuperRecyclerView mRecyclerView;
     private PlaylistsParserService mService;
     private ServiceConnection mServiceConnection;
     private boolean mBound;
@@ -80,7 +89,7 @@ public class SearchResultsActivity extends ActionBarActivity {
             return;
         }
 
-        PrefsHelper.putRecent(this, mSearchQuery);
+        PrefsHelper.putRecentSearch(this, mSearchQuery);
 
         setContentView(R.layout.activity_search_results);
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
@@ -94,33 +103,17 @@ public class SearchResultsActivity extends ActionBarActivity {
     @Override
     public void onSupportContentChanged() {
         super.onSupportContentChanged();
-        btnFindTopTracks = (TextView) findViewById(R.id.btn_find_top_tracks);
-        btnFindTopTracks.setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.btn_find_top_tracks).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                btnFindTopTracks.setEnabled(false);
+                v.setEnabled(false);
                 showProgressDialog("Parsing playlists");
                 parsePlaylists();
             }
         });
-        mRecyclerView = (TwoWayView) findViewById(R.id.two_way_view);
-        mRecyclerView.setHasFixedSize(true);
-        final ItemClickSupport itemClickSupport = ItemClickSupport.addTo(mRecyclerView);
-        itemClickSupport.setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
-            @Override
-            public void onItemClick(RecyclerView recyclerView, View view, int i, long l) {
-                PlaylistSimple playlist = mPlaylists.get(i);
-                Intent intent = new Intent(SearchResultsActivity.this, PlaylistDetailsActivity.class);
-                intent.putExtra(PlaylistDetailsActivity.EXTRA_PLAYLIST_OWNER_ID, playlist.owner.id);
-                intent.putExtra(PlaylistDetailsActivity.EXTRA_PLAYLIST_ID, playlist.id);
-                intent.putExtra(PlaylistDetailsActivity.EXTRA_PLAYLIST_NAME, playlist.name);
-                startActivity(intent);
-            }
-        });
-        final Drawable divider = getResources().getDrawable(R.drawable.divider_thin_opaque);
-        mRecyclerView.addItemDecoration(new DividerItemDecoration(divider));
-        mPlaylistsAdapter = new PlaylistSimpleAdapter(this);
-        mRecyclerView.setAdapter(mPlaylistsAdapter);
+        mRecyclerView = (SuperRecyclerView) findViewById(R.id.recycler_view);
+        mRecyclerView.setLayoutManager(getLayoutManager());
+        mRecyclerView.addItemDecoration(new SpaceItemDecoration(getResources().getDimensionPixelSize(R.dimen.card_item_padding)));
     }
 
     @Override
@@ -172,7 +165,6 @@ public class SearchResultsActivity extends ActionBarActivity {
 
             @Override
             public void success(final PlaylistsPager playlistsPager, Response response) {
-                Log.d("Success", response.toString());
                 if (null == mPlaylists) {
                     mPlaylists = new ArrayList<>(playlistsPager.playlists.total);
                 }
@@ -197,7 +189,7 @@ public class SearchResultsActivity extends ActionBarActivity {
 
             @Override
             public void failure(RetrofitError error) {
-                Log.d("Failure", error.toString());
+                Log.d(TAG, "Error searching playlists, " + error.toString());
                 mHandler.post(mHideProgressRunnable);
             }
         });
@@ -262,8 +254,12 @@ public class SearchResultsActivity extends ActionBarActivity {
     }
 
     private void showRankedTracksFragment(ArrayList<RankedTrack> rankedTracks) {
-        RankedTracksFragment fragment = RankedTracksFragment.newInstance(rankedTracks);
+        RankedTracksFragment fragment = RankedTracksFragment.newInstance(mSearchQuery, rankedTracks);
         getSupportFragmentManager().beginTransaction().replace(R.id.container, fragment, "ranked_tracks").commit();
+    }
+
+    private RecyclerView.LayoutManager getLayoutManager() {
+        return new LinearLayoutManager(this);
     }
 
 }

@@ -20,15 +20,17 @@ import kaaes.spotify.webapi.android.models.PlaylistSimple;
  */
 public class PlaylistSimpleAdapter extends RecyclerView.Adapter<PlaylistSimpleAdapter.ViewHolder> {
 
-    private final Context sContext;
+    private Context sContext;
+    private ItemClickSupport sItemClickSupport;
     private List<PlaylistSimple> sPlaylists;
 
-    public PlaylistSimpleAdapter(Context context) {
-        this(context, null);
+    public PlaylistSimpleAdapter(Context context, ItemClickSupport itemClickSupport) {
+        this(context, itemClickSupport, null);
     }
 
-    public PlaylistSimpleAdapter(Context context, List<PlaylistSimple> playlists) {
+    public PlaylistSimpleAdapter(Context context, ItemClickSupport itemClickSupport, List<PlaylistSimple> playlists) {
         this.sContext = context;
+        this.sItemClickSupport = itemClickSupport;
         this.sPlaylists = playlists;
     }
 
@@ -39,20 +41,34 @@ public class PlaylistSimpleAdapter extends RecyclerView.Adapter<PlaylistSimpleAd
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(sContext).inflate(R.layout.playlist_list_item, parent, false);
+        View view = LayoutInflater.from(sContext).inflate(R.layout.playlist_simple_list_item, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
+    public void onBindViewHolder(ViewHolder holder, final int position) {
         PlaylistSimple playlist = sPlaylists.get(position);
+        holder.name.setText(playlist.name);
+        holder.trackCount.setText(sContext.getResources().getQuantityString(R.plurals.track, playlist.tracks.total, playlist.tracks.total));
         List<Image> images = playlist.images;
         if (null != images && images.size() > 0)
-            Picasso.with(sContext).load(images.get(0).url).resize(192, 192).into(holder.image);
+            Picasso.with(sContext).load(images.get(0).url).placeholder(R.drawable.ic_playlist_primary).error(R.drawable.ic_playlist_primary).resize(192, 192).into(holder.image);
         else
-            holder.image.setImageResource(R.drawable.ic_launcher);
-        holder.name.setText(playlist.name);
-        holder.trackCount.setText(playlist.tracks.total + " tracks");
+            holder.image.setImageResource(R.drawable.ic_playlist_primary);
+        if (null != sItemClickSupport) {
+            holder.itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    sItemClickSupport.onItemClicked(position);
+                }
+            });
+            holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    return sItemClickSupport.onItemLongClicked(position);
+                }
+            });
+        }
     }
 
     @Override

@@ -7,8 +7,6 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.spotify.sdk.android.Spotify;
-import com.spotify.sdk.android.authentication.AuthenticationResponse;
-import com.spotify.sdk.android.authentication.SpotifyAuthentication;
 import com.spotify.sdk.android.playback.Config;
 import com.spotify.sdk.android.playback.ConnectionStateCallback;
 import com.spotify.sdk.android.playback.Player;
@@ -17,6 +15,7 @@ import com.spotify.sdk.android.playback.PlayerState;
 
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
+import kaaes.spotify.webapi.android.models.User;
 
 /**
  * Created by Gaelan on 1/2/2015.
@@ -26,15 +25,16 @@ public class PlaylistMiner extends Application implements
 
     protected static final String CLIENT_ID = "8f3ae002e2c24b7db50a4258b4311226";
     protected static final String REDIRECT_URI = "gb-unknown://callback";
+    protected static final String[] SCOPES = new String[]{"user-read-private", "user-read-email", "playlist-read-private", "playlist-modify-public", "playlist-modify-private", "streaming"};
     private static final String TAG = "PlaylistMiner";
-
     private static PlaylistMiner mApp;
     private static SpotifyService mSpotifyService;
     private static Player mPlayer;
+    private static User mUser;
 
     public static SpotifyService getSpotifyService(Context context) {
         if (null == mSpotifyService) {
-            String accessToken = PrefsHelper.getToken(context);
+            String accessToken = PrefsHelper.getAccessToken(context);
             if (TextUtils.isEmpty(accessToken))
                 return null;
             SpotifyApi spotifyApi = new SpotifyApi();
@@ -46,7 +46,7 @@ public class PlaylistMiner extends Application implements
 
     public static Player getPlayer(final Context context) {
         if (null == mPlayer) {
-            Config playerConfig = new Config(context, PrefsHelper.getToken(context), CLIENT_ID);
+            Config playerConfig = new Config(context, PrefsHelper.getAccessToken(context), CLIENT_ID);
             Spotify spotify = new Spotify();
             mPlayer = spotify.getPlayer(playerConfig, context, new Player.InitializationObserver() {
                 @Override
@@ -62,6 +62,14 @@ public class PlaylistMiner extends Application implements
             });
         }
         return mPlayer;
+    }
+
+    public static User getUser() {
+        return mUser;
+    }
+
+    public static void setUser(User user) {
+        mUser = user;
     }
 
     @Override
@@ -129,5 +137,4 @@ public class PlaylistMiner extends Application implements
                 break;
         }
     }
-
 }

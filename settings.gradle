@@ -1,1 +1,1 @@
-include ':app', ':preferencefragment', ':spotify-web-api-android', ':discreteSeekBar'
+include ':app', ':preferencefragment', ':spotify-web-api-android'

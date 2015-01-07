@@ -13,22 +13,30 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <TextView
+        <FrameLayout
             android:id="@+id/btn_find_top_tracks"
             android:layout_width="match_parent"
             android:layout_height="48dp"
-            android:background="?android:attr/selectableItemBackground"
-            android:gravity="center"
-            android:text="Find Top Tracks"
-            android:textAppearance="?android:attr/textAppearanceButton" />
+            android:background="?android:attr/selectableItemBackground">
 
-        <org.lucasr.twowayview.widget.TwoWayView
-            android:id="@+id/two_way_view"
-            style="@style/TwoWayView"
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="?attr/colorAccent"
+                android:gravity="center"
+                android:text="Find Top Tracks"
+                android:textAppearance="?android:attr/textAppearanceButton"
+                android:textColor="@android:color/primary_text_dark" />
+        </FrameLayout>
+
+        <com.malinskiy.superrecyclerview.SuperRecyclerView
+            android:id="@+id/recycler_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_below="@id/btn_find_top_tracks"
-            app:twowayview_layoutManager="ListLayoutManager" />
+            app:layout_empty="@layout/empty_generic"
+            app:recyclerClipToPadding="false"
+            app:scrollbarStyle="outsideOverlay" />
 
     </RelativeLayout>
 </LinearLayout>
