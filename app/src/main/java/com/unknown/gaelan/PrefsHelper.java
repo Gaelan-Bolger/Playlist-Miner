@@ -11,6 +11,7 @@ import java.util.Arrays;
 
 /**
  * Created by Gaelan on 1/2/2015.
+ * SharedPreferences helper
  */
 public class PrefsHelper {
 
